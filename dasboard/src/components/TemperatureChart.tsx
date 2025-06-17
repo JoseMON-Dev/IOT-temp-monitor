@@ -105,10 +105,9 @@ export const TemperatureChart = () => {
   
   useEffect(() => {
     fetchData();
-    
     const interval = setInterval(() => {
       fetchData();
-    }, 1000);
+    }, 10000);
     
     return () => clearInterval(interval);
   }, [fetchData, timeRange, dataType]);

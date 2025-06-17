@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Stack } from '@mui/material';
 import { ThermostatOutlined } from '@mui/icons-material';
 import { formatDistanceToNow, isValid } from 'date-fns';
 import type { TemperatureReading } from '../types/metrics';
-import { metricsService } from '../services/metricsService';
 
 export const CurrentTemperature = () => {
   const [error, setError] = useState<string | null>(null);
@@ -14,32 +13,42 @@ export const CurrentTemperature = () => {
   });
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
-  const fetchData = useCallback(async () => {
-    try {
-      const result = await metricsService.getLatestTemperature();
-      setData(result || {
-        temperature: 0,
-        humidity: undefined,
-        timestamp: new Date().toISOString()
-      });
-      setLastUpdated(new Date());
+   useEffect(() => {
+    const socket = new WebSocket('ws://localhost:7000/ws');
+
+    socket.onopen = () => {
+      console.log('WebSocket connection established');
       setError(null);
-    } catch (err) {
-      setError('Failed to fetch latest temperature data');
-      console.error(err);
-    }
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+
+        if (msg.type === 'temp_update' && msg.data) {
+          setData(msg.data);
+          setLastUpdated(new Date());
+        }
+      } catch (err) {
+        console.error('Failed to parse message:', err);
+      }
+    };
+
+    socket.onerror = (err) => {
+      console.error('WebSocket error:', err);
+      setError('WebSocket error');
+    };
+
+    socket.onclose = () => {
+      console.log('WebSocket connection closed');
+      setError('Connection closed');
+    };
+
+    // Limpieza al desmontar el componente
+    return () => {
+      socket.close();
+    };
   }, []);
-  
-  useEffect(() => {
-    fetchData();
-    
-    // Refresh data every 30 seconds
-    const interval = setInterval(() => {
-      fetchData();
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [fetchData]);
   
   const getTemperatureColor = (temp: number) => {
     if (temp < 10) return '#2196f3'; // Cold - blue
