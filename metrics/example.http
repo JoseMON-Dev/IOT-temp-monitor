@@ -1,0 +1,49 @@
+###
+# IoT Temperature Monitoring - Metrics API Examples
+# This file can be run with REST Client extension in VS Code or similar HTTP client tools
+###
+
+@baseUrl = http://localhost:7000
+
+### Home endpoint - Get API information
+GET {{baseUrl}}/ HTTP/1.1
+
+### Get the latest temperature reading
+GET {{baseUrl}}/api/analytics/temperature/latest HTTP/1.1
+
+### Get temperature readings for last 24 hours
+GET {{baseUrl}}/api/analytics/temperature/range HTTP/1.1
+
+### Get temperature readings for a specific time range
+# Format: YYYY-MM-DDTHH:mm:ss.sssZ (ISO format)
+GET {{baseUrl}}/api/analytics/temperature/range?start=2023-06-15T00:00:00.000Z&end=2023-06-17T00:00:00.000Z HTTP/1.1
+
+### Get temperature alerts for last 7 days
+GET {{baseUrl}}/api/analytics/alerts HTTP/1.1
+
+### Get temperature alerts for a specific time range
+GET {{baseUrl}}/api/analytics/alerts?start=2023-06-10T00:00:00.000Z&end=2023-06-16T00:00:00.000Z HTTP/1.1
+
+### Get cooling events for last 7 days
+GET {{baseUrl}}/api/analytics/cooling HTTP/1.1
+
+### Get cooling events for a specific time range
+GET {{baseUrl}}/api/analytics/cooling?start=2023-06-10T00:00:00.000Z&end=2023-06-16T00:00:00.000Z HTTP/1.1
+
+### Get temperature statistics for last 7 days
+GET {{baseUrl}}/api/analytics/statistics HTTP/1.1
+
+### Get temperature statistics for a specific time range
+GET {{baseUrl}}/api/analytics/statistics?start=2023-06-10T00:00:00.000Z&end=2023-06-16T00:00:00.000Z HTTP/1.1
+
+### Get hourly temperature aggregates for last 24 hours
+GET {{baseUrl}}/api/analytics/hourly HTTP/1.1
+
+### Get hourly temperature aggregates for a specific time range
+GET {{baseUrl}}/api/analytics/hourly?start=2023-06-15T00:00:00.000Z&end=2023-06-16T00:00:00.000Z HTTP/1.1
+
+### Get daily temperature aggregates for last 30 days
+GET {{baseUrl}}/api/analytics/daily HTTP/1.1
+
+### Get daily temperature aggregates for a specific time range
+GET {{baseUrl}}/api/analytics/daily?start=2023-05-16T00:00:00.000Z&end=2023-06-16T00:00:00.000Z HTTP/1.1
