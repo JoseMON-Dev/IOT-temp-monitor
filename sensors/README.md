@@ -53,6 +53,14 @@ Before uploading the code to your ESP32, you need to modify the following parame
    const char* mqtt_password = "YourMQTTPassword";
    ```
 
+   ```bash
+   xxd -i certs/hivemq_ca.pem > src/ca_cert.h
+   ```
+    ```cpp
+   #include "ca_cert.h"
+   ```
+
+
 ## MQTT Topics
 
 The system uses the following MQTT topics:

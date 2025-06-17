@@ -31,7 +31,8 @@ export class MqttService {
       clientId: `${clientId}_${crypto.randomUUID()}}`,
       clean: true,
       reconnectPeriod: 5000,
-      rejectUnauthorized: false
+      rejectUnauthorized: false,
+      ca: await Bun.file(this.configService.get("CERT_FILE_PATH")).text()
     };
 
     if (username && password) {

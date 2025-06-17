@@ -4,7 +4,7 @@
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include "credentials.h" // Include credentials from separate file
-
+#include "ca_cert.h"
 // Pin Definitions
 #define DHT_PIN 14     // DHT22 sensor pin
 #define BUZZER_PIN 26  // Buzzer pin
@@ -122,10 +122,11 @@ void connectWiFi()
 
 void connectMQTT()
 {
+  espClient.setCACert((const char *)certs_hivemq_ca_pem);
   while (!mqtt.connected())
   {
     Serial.print("Connecting to MQTT broker...");
-    espClient.setInsecure();
+    // espClient.setInsecure();
     if (mqtt.connect(client_id, mqtt_username, mqtt_password))
     {
       Serial.println("connected");

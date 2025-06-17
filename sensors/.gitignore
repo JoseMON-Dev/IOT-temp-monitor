@@ -6,7 +6,8 @@
 
 # Credentials file
 src/credentials.h
-
+src/ca_cert.h
+certs/*
 # Build output
 build/
 
