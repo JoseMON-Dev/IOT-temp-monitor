@@ -9,7 +9,8 @@ export const TYPES = {
   MetricsService: Symbol.for("MetricsService"),
   MqttService: Symbol.for("MqttService"),
   AnalyticsController: Symbol.for("AnalyticsController"),
-  NotificationService: Symbol.for("NotificationService")
+  NotificationService: Symbol.for("NotificationService"),
+  MetricsEvnetEmitter: Symbol.for("MetricsEventEmitter")
 };
 
 // Create and export the IoC container

@@ -11,6 +11,8 @@ import type {
 } from '../models/metrics.model';
 import { format, subDays, subHours, parseISO } from 'date-fns';
 import { NotificationService } from './notification.service';
+import { EventEmitterAsyncResource } from 'events';
+import { te, th } from 'date-fns/locale';
 
 @injectable()
 export class MetricsService {
@@ -26,7 +28,8 @@ export class MetricsService {
   constructor(
     @inject(TYPES.DatabaseService) private db: DatabaseService,
     @inject(TYPES.ConfigService) private configService: ConfigService,
-    @inject(TYPES.NotificationService) private notificationService: NotificationService
+    @inject(TYPES.NotificationService) private notificationService: NotificationService,
+    @inject(TYPES.MetricsEvnetEmitter) private eventEmitter: EventEmitterAsyncResource
   ) {}
 
   /**
@@ -67,7 +70,6 @@ export class MetricsService {
    */
   recordHumidity(humidity: number): void {
     this.currentHumidity = humidity;
-    
     // We only save humidity alongside temperature readings
     // to reduce database writes and keep them paired
   }
@@ -80,6 +82,10 @@ export class MetricsService {
     
     if (isActive && !this.alertActive) {
       this.startAlert(this.currentTemperature, timestamp);
+      this.eventEmitter.emit('alert', {
+        temperature: this.currentTemperature,
+        timestamp
+      });
     }
     else if (!isActive && this.alertActive) {
       this.endAlert(timestamp);
@@ -102,6 +108,7 @@ export class MetricsService {
     };
     
     this.storeAlert(alert);
+    
     console.log(`Alert started at ${timestamp} with temperature ${temperature}°C`);
     
     // Send notification
@@ -208,6 +215,11 @@ export class MetricsService {
    */
   private storeTemperatureReading(reading: TemperatureReading): void {
     try {
+      this.eventEmitter.emit('temp_update', {
+        temperature: reading.temperature,
+        humidity: reading.humidity,
+        timestamp: reading.timestamp
+      });
       this.db.run(
         `INSERT INTO temperature_readings (timestamp, temperature, humidity)
          VALUES (?, ?, ?)`,

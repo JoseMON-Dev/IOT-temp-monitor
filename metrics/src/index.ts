@@ -9,8 +9,10 @@ import { container, TYPES } from './ioc/container';
 import { swagger } from '@elysiajs/swagger'
 import { cors } from '@elysiajs/cors'
 import { NotificationService } from './services/notification.service';
+import { EventEmitterAsyncResource } from 'node:events';
 
 // Configure IoC container bindings
+container.bind<EventEmitterAsyncResource>(TYPES.MetricsEvnetEmitter).toConstantValue(new EventEmitterAsyncResource({name:"MetricsServer"}));
 container.bind<ConfigService>(TYPES.ConfigService).to(ConfigService).inSingletonScope();
 container.bind<DatabaseService>(TYPES.DatabaseService).to(DatabaseService).inSingletonScope();
 container.bind<MetricsService>(TYPES.MetricsService).to(MetricsService).inSingletonScope();
@@ -32,6 +34,20 @@ mqttService.connect().catch(err => {
 const app = new Elysia()
   .use(swagger())
   .use(analyticsController.getRouter())
+  .ws('/ws', {
+    message: (ws, message) => {
+      ws.send(`Echo: ${message}`);
+    },
+    open: (ws) => {
+      const emitter = container.get<EventEmitterAsyncResource>(TYPES.MetricsEvnetEmitter);
+      emitter.on('temp_update', (temp) => {
+        ws.send(JSON.stringify({ type: 'temp_update', data: temp }));
+      })
+      emitter.on('alert', (alert) => {
+        ws.send(JSON.stringify({ type: 'alert', data: alert }));
+      });
+    }
+  })
   .get('/', () => ({ 
     message: 'IoT Temperature Monitoring Metrics API', 
     version: '1.0.0',
