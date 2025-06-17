@@ -33,7 +33,8 @@ bool alarmActive = false;
 unsigned long lastPublishTime = 0;
 bool servoActive = false;
 bool manualControlMode = false;
-
+unsigned long previousSensorTime = 0;
+const unsigned long sensorInterval = 1000;
 // Function Declarations
 void connectWiFi();
 void connectMQTT();
@@ -85,16 +86,16 @@ void loop()
     connectMQTT();
   }
   mqtt.loop();
+  unsigned long currentTime = millis();
+  if (currentTime - previousSensorTime >= sensorInterval)
+  {
+    previousSensorTime = currentTime;
 
-  // Read sensor data
-  readSensorData();
-
-  // Publish data periodically
-  publishData();
-
-  // Check temperature and take action if needed
-  checkTemperature();
-
+    // Ejecutar tareas cada segundo
+    readSensorData();
+    publishData();
+    checkTemperature();
+  }
   // Handle button inputs
   handleButtons();
 

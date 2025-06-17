@@ -9,10 +9,10 @@ import { container, TYPES } from './ioc/container';
 import { swagger } from '@elysiajs/swagger'
 import { cors } from '@elysiajs/cors'
 import { NotificationService } from './services/notification.service';
-import { EventEmitterAsyncResource } from 'node:events';
+import { EventEmitter } from 'node:events';
 
 // Configure IoC container bindings
-container.bind<EventEmitterAsyncResource>(TYPES.MetricsEvnetEmitter).toConstantValue(new EventEmitterAsyncResource({name:"MetricsServer"}));
+container.bind<EventEmitter>(TYPES.MetricsEvnetEmitter).toConstantValue(new EventEmitter());
 container.bind<ConfigService>(TYPES.ConfigService).to(ConfigService).inSingletonScope();
 container.bind<DatabaseService>(TYPES.DatabaseService).to(DatabaseService).inSingletonScope();
 container.bind<MetricsService>(TYPES.MetricsService).to(MetricsService).inSingletonScope();
@@ -35,8 +35,11 @@ const app = new Elysia()
   .use(swagger())
   .use(analyticsController.getRouter())
   .ws('/ws', {
+    message: (ws, message) => {
+      ws.send(JSON.stringify({ type: 'message', data: message }));
+    },
     open: (ws) => {
-      const emitter = container.get<EventEmitterAsyncResource>(TYPES.MetricsEvnetEmitter);
+      const emitter = container.get<EventEmitter>(TYPES.MetricsEvnetEmitter);
       emitter.on('temp_update', (temp) => {
         ws.send(JSON.stringify({ type: 'temp_update', data: temp }));
       })

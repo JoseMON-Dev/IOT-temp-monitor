@@ -30,7 +30,9 @@ export class MetricsService {
     @inject(TYPES.ConfigService) private configService: ConfigService,
     @inject(TYPES.NotificationService) private notificationService: NotificationService,
     @inject(TYPES.MetricsEvnetEmitter) private eventEmitter: EventEmitterAsyncResource
-  ) {}
+  ) {
+    this.eventEmitter.emit('ready', 'MetricsService initialized');
+  }
 
   /**
    * Record a temperature reading
