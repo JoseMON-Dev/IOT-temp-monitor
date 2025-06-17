@@ -44,7 +44,7 @@ export class AnalyticsController {
         end: end.toISOString()
       };
 
-      const readings = await this.metricsService.getTemperatureReadings(period);
+      const readings = (await this.metricsService.getTemperatureReadings(period)).slice(0, 5000); // Limit to 1000 readings for performance
       return { period, readings };
     });
 
