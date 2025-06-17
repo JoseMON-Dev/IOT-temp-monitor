@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "author": "jose montes",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 124.8, "left": 43.24, "attrs": {} },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 177.6,
+      "left": -67.75,
+      "rotate": 90,
+      "attrs": { "value": "224" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": 82.8,
+      "left": -63.4,
+      "attrs": { "color": "purple" }
+    },
+    { "type": "wokwi-servo", "id": "servo1", "top": 142, "left": 288, "attrs": {} },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": -16.8,
+      "left": -46.2,
+      "attrs": { "volume": "0.1" }
+    },
+    { "type": "wokwi-dht22", "id": "dht1", "top": 9.9, "left": -111, "attrs": {} },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn1",
+      "top": 289,
+      "left": 176.8,
+      "rotate": 90,
+      "attrs": { "color": "blue", "xray": "1" }
+    },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn2",
+      "top": 231.4,
+      "left": 167.2,
+      "rotate": 90,
+      "attrs": { "color": "yellow", "xray": "1" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "dht1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "esp:GND.1", "dht1:GND", "black", [ "h0" ] ],
+    [ "dht1:SDA", "esp:14", "green", [ "v0" ] ],
+    [ "esp:GND.1", "led1:C", "black", [ "h0" ] ],
+    [ "led1:A", "r1:1", "purple", [ "v0", "h19.2" ] ],
+    [ "esp:27", "r1:2", "purple", [ "h0" ] ],
+    [ "esp:GND.1", "bz1:1", "black", [ "h0" ] ],
+    [ "bz1:2", "esp:26", "red", [ "v0" ] ],
+    [ "esp:4", "servo1:PWM", "orange", [ "h124.8", "v0", "v-57.8" ] ],
+    [ "esp:GND.2", "servo1:GND", "black", [ "h38.4", "v38.4" ] ],
+    [ "esp:GND.2", "btn1:1.l", "black", [ "v0", "h57.6" ] ],
+    [ "esp:GND.2", "btn2:1.l", "black", [ "v0", "h38.4" ] ],
+    [ "esp:15", "btn1:2.l", "green", [ "v0" ] ],
+    [ "esp:2", "btn2:2.l", "green", [ "h0" ] ],
+    [ "esp:5V", "servo1:V+", "red", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}
