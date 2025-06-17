@@ -35,9 +35,6 @@ const app = new Elysia()
   .use(swagger())
   .use(analyticsController.getRouter())
   .ws('/ws', {
-    message: (ws, message) => {
-      ws.send(`Echo: ${message}`);
-    },
     open: (ws) => {
       const emitter = container.get<EventEmitterAsyncResource>(TYPES.MetricsEvnetEmitter);
       emitter.on('temp_update', (temp) => {
