@@ -145,26 +145,6 @@ export class MqttService {
     }
   }
 
-  /**
-   * Publish a message to a topic
-   * @param topic The topic to publish to
-   * @param message The message to publish
-   * @param retain Whether to retain the message
-   */
-  async publish(topic: string, message: string, retain = false): Promise<void> {
-    if (!this.client || !this.isConnected) {
-      console.error('Cannot publish: MQTT client not connected');
-      return;
-    }
-
-    this.client.publish(topic, message, { retain }, (err) => {
-      if (err) {
-        console.error(`Failed to publish to ${topic}:`, err);
-      } else {
-        console.log(`Published to ${topic}: ${message}`);
-      }
-    });
-  }
 
   /**
    * Disconnect from the MQTT broker

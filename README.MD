@@ -98,7 +98,7 @@ El sistema opera siguiendo este flujo:
 
 -  **Metrics Service**: Servidor backend Node.js/TypeScript con Elysia y SQLite
 
--  **Dashboard**: Aplicación web React/TypeScript con Material-UI y Recharts
+-  **Dashboard**: Aplicación web
 
 -  **MQTT Broker**: Servicio de mensajería central para comunicar todos los componentes
 
@@ -313,3 +313,260 @@ El sistema opera siguiendo este flujo:
 
 - Node red.
 
+
+# Diagrama de Arquitectura del Sistema de Monitoreo de Temperatura IoT
+
+  
+
+## Diagrama de Componentes
+
+  
+
+```mermaid
+
+graph TD
+
+%% Definición de estilos
+
+classDef sensor fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
+
+classDef communication fill:#fff8e1,stroke:#ffa000,stroke-width:2px
+
+classDef backend fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+
+classDef frontend fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
+
+classDef database fill:#fbe9e7,stroke:#d84315,stroke-width:2px
+
+classDef notification fill:#efebe9,stroke:#5d4037,stroke-width:2px
+
+  
+
+%% Componentes del sistema
+
+ESP32["ESP32 / DHT22<br/>Sensor Module"] -->|"MQTT<br/>(Temperature/Humidity Data)"| MQTT["MQTT Broker<br/>(HiveMQ)"]
+
+ESP32 -->|"Activación"| ACTUATORS["Actuadores<br/>(Servo/Buzzer)"]
+
+MQTT -->|"Suscripción a<br/>Tópicos"| METRICS["Metrics Service<br/>(Bun.js + Elysia)"]
+
+METRICS -->|"Almacena<br/>Datos"| DB["SQLite<br/>Database"]
+
+METRICS -->|"REST API<br/>WebSockets"| DASHBOARD["Web Dashboard<br/>"]
+
+METRICS -->|"Notificaciones<br/>Críticas"| NOTIFY["Notification<br/>Service (Twilio)"]
+
+DB -->|"Consultas"| ANALYTICS["Analytics<br/>Controller"]
+
+ANALYTICS -->|"Datos<br/>Procesados"| DASHBOARD
+
+DASHBOARD -->|"API Calls"| METRICS
+
+  
+
+%% Aplicación de estilos
+
+class ESP32,ACTUATORS sensor
+
+class MQTT communication
+
+class METRICS,ANALYTICS backend
+
+class DASHBOARD frontend
+
+class DB database
+
+class NOTIFY notification
+
+```
+
+  
+
+## Flujo de Datos
+
+  
+
+```mermaid
+
+sequenceDiagram
+
+participant Sensor as ESP32/DHT22 Sensor
+
+participant MQTT as MQTT Broker
+
+participant Metrics as Metrics Service
+
+participant DB as SQLite Database
+
+participant Dashboard as Web Dashboard
+
+participant Notify as Notification Service
+
+participant Actuator as Actuadores (Servo/Buzzer)
+
+  
+
+Sensor->>Sensor: Lee temperatura/humedad cada 500ms
+
+Sensor->>MQTT: Publica datos (temp/humidity topics)
+
+MQTT->>Metrics: Recibe datos (suscripción)
+
+Metrics->>DB: Almacena lecturas
+
+Metrics->>Metrics: Analiza datos (umbral > 37°C)
+
+alt Temperatura > Umbral
+
+Metrics->>Notify: Envía alerta crítica
+
+Metrics->>MQTT: Publica comando de alarma
+
+MQTT->>Sensor: Recibe comando de alarma
+
+Sensor->>Actuator: Activa refrigeración y alarma
+
+end
+
+Dashboard->>Metrics: Solicita datos (REST API)
+
+Metrics->>DB: Consulta datos históricos
+
+DB->>Metrics: Retorna resultados
+
+Metrics->>Dashboard: Envía datos para visualización
+
+Metrics->>Dashboard: Stream en tiempo real (WebSockets)
+
+```
+
+  
+
+## Arquitectura del Sistema
+
+  
+
+```mermaid
+
+flowchart TD
+
+subgraph "Capa de Sensores"
+
+ESP["ESP32"] --- DHT["DHT22 Sensor"]
+
+ESP --- BUZZER["Buzzer"]
+
+ESP --- SERVO["Servo Motor"]
+
+ESP --- LED["LED Indicador"]
+
+ESP --- BUTTON["Botones de Control"]
+
+end
+
+subgraph "Capa de Comunicación"
+
+WIFI["WiFi"] --- MQTTS["MQTT Seguro<br/>(TLS)"]
+
+end
+
+subgraph "Capa de Procesamiento"
+
+BUN["Bun.js Runtime"] --- ELYSIA["Elysia Framework"]
+
+ELYSIA --- ROUTES["API Routes"]
+
+ELYSIA --- WS["WebSockets"]
+
+IOC["Inversify IoC Container"] --- SERVICES["Servicios"]
+
+end
+
+subgraph "Capa de Almacenamiento"
+
+SQLITE["SQLite"] --- MODELS["Modelos de Datos"]
+
+SQLITE --- QUERIES["Consultas SQL"]
+
+end
+
+subgraph "Capa de Presentación"
+Dashboard
+
+end
+
+subgraph "Capa de Notificación"
+
+TWILIO["Twilio API"] --- SMS["Alertas SMS"]
+
+end
+
+%% Conexiones entre capas
+
+ESP --> WIFI
+
+WIFI --> BUN
+
+BUN --> SQLITE
+
+BUN --> TWILIO
+
+Dashboard --> ROUTES
+
+Dashboard --> WS
+
+```
+
+  
+
+## Diagrama de Despliegue
+
+  
+
+```mermaid
+
+graph TB
+
+subgraph "Dispositivos IoT"
+
+ESP32["ESP32 con DHT22<br/>Sensor Module"]
+
+end
+
+subgraph "Servidor de Métricas"
+
+METRICS["Metrics Service<br/>Bun.js + Elysia"]
+
+DB["SQLite Database"]
+
+METRICS --- DB
+
+end
+
+subgraph "Frontend"
+
+DASHBOARD["Web Dashboard<br/>"]
+
+end
+
+subgraph "Servicios en la Nube"
+
+MQTT["MQTT Broker<br/>(HiveMQ)"]
+
+TWILIO["Twilio SMS<br/>Service"]
+
+end
+
+ESP32 -->|"MQTT/TLS"| MQTT
+
+MQTT -->|"MQTT/TLS"| METRICS
+
+METRICS -->|"REST API"| DASHBOARD
+
+METRICS -->|"WebSockets"| DASHBOARD
+
+METRICS -->|"API"| TWILIO
+
+TWILIO -->|"SMS"| ADMIN["Administradores<br/>(Teléfonos Móviles)"]
+
+```
